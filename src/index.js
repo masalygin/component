@@ -2,7 +2,6 @@ import $ from 'jquery';
 import EventEmitter from 'events';
 
 
-
 export default class Component extends EventEmitter {
 
   ns = 'component';
@@ -12,20 +11,36 @@ export default class Component extends EventEmitter {
   events = {};
 
 
+  /**
+   *
+   */
   constructor() {
     super();
     this.$el = $(this.el);
   }
 
 
+  /**
+   *
+   * @param selector
+   * @returns {*}
+     */
   $(selector) {
     return this.$el.find(selector);
   }
 
 
-  template() {}
+  /**
+   *
+   */
+  template() {
+  }
 
 
+  /**
+   *
+   * @returns {Component}
+     */
   render() {
     this.undelegateEvents();
     this.$el.html(this.template(this));
@@ -35,6 +50,10 @@ export default class Component extends EventEmitter {
   }
 
 
+  /**
+   *
+   * @returns {Component}
+     */
   bindUI() {
     this.$ui = {};
     this._sortedUI = [];
@@ -47,11 +66,15 @@ export default class Component extends EventEmitter {
   }
 
 
+  /**
+   *
+   * @returns {Component}
+     */
   delegateEvents() {
     let self = this;
     $.each(this.events, (key, method) => {
       let {eventName, selector} = this._resolveEventKey(key);
-      this.delegate(eventName, selector, function(e) {
+      this.delegate(eventName, selector, function (e) {
         return self::self[method]($(this), e);
       });
     });
@@ -59,24 +82,47 @@ export default class Component extends EventEmitter {
   }
 
 
+  /**
+   *
+   * @returns {Component}
+     */
   undelegateEvents() {
-    this.$el.off('.${this.ns}');
+    this.$el.off(`.${this.ns}`);
     return this;
   }
 
 
+  /**
+   *
+   * @param eventName string
+   * @param selector string
+   * @param listener function
+   * @returns {Component}
+     */
   delegate(eventName, selector, listener) {
     this.$el.on(`${eventName}.${this.ns}`, selector, listener);
     return this;
   }
 
 
-  undelegate(eventName, selector, listener) {
-    this.$el.on(`${eventName}.${this.ns}`, selector, listener);
+  /**
+   *
+   * @param eventName string
+   * @param selector string
+   * @returns {Component}
+     */
+  undelegate(eventName, selector) {
+    this.$el.off(`${eventName}.${this.ns}`, selector);
     return this;
   }
 
 
+  /**
+   *
+   * @param key string
+   * @returns {{eventName: (string), selector: (string)}}
+   * @private
+     */
   _resolveEventKey(key) {
     let index = key.indexOf(' ');
     let eventName = key.slice(0, index);

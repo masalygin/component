@@ -1,5 +1,6 @@
 import Component from '../src';
 import {expect} from 'chai';
+import $ from 'jquery';
 
 
 describe('Component', () => {
@@ -11,10 +12,14 @@ describe('Component', () => {
     li: 'li'
   };
 
-
   let events = {
-    'click ui li': 'clickOnItem',
+    'click ul li': 'clickOnItem',
     'click @ui.first': 'clickOnFirst'
+  };
+
+  let counters = {
+    clickOnItem: 0,
+    clickOnFirst: 0
   };
 
 
@@ -35,11 +40,11 @@ describe('Component', () => {
     };
 
     clickOnItem() {
-
+      counters.clickOnItem++;
     }
 
     clickOnFirst() {
-
+      counters.clickOnFirst++;
     }
 
   }
@@ -47,7 +52,6 @@ describe('Component', () => {
 
   let widget = new Widget();
   widget.render();
-
 
   it('#template()', () => {
     expect(widget.template(widget)).to.be.equal(`
@@ -58,6 +62,10 @@ describe('Component', () => {
       `);
   });
 
+
+  it('#$()', () => {
+    expect(widget.$('ul li').length).to.be.equal(2);
+  });
 
 
   it('#el', () => {
@@ -82,8 +90,47 @@ describe('Component', () => {
   });
 
 
+  it('#_resolveEventKey()', () => {
+    expect(widget._resolveEventKey('click ui li')).to.be.deep.equal({
+      eventName: 'click',
+      selector: 'ui li'
+    });
+    expect(widget._resolveEventKey('click @ui.first')).to.be.deep.equal({
+      eventName: 'click',
+      selector: '.first'
+    });
+  });
 
 
+  it('#delegateEvents()', () => {
+    expect(counters).to.be.deep.equal({clickOnItem: 0, clickOnFirst: 0});
+    $('.first').trigger('click');
+    expect(counters).to.be.deep.equal({clickOnItem: 1, clickOnFirst: 1});
+    $('ul li').trigger('click');
+    expect(counters).to.be.deep.equal({clickOnItem: 3, clickOnFirst: 2});
+  });
+
+
+  it('#undelegate()', () => {
+    counters.clickOnItem = 0;
+    counters.clickOnFirst = 0;
+    expect(counters).to.be.deep.equal({clickOnItem: 0, clickOnFirst: 0});
+    widget.undelegate('click', '.first');
+    $('.first').trigger('click');
+    expect(counters).to.be.deep.equal({clickOnItem: 1, clickOnFirst: 0});
+    $('ul li').trigger('click');
+    expect(counters).to.be.deep.equal({clickOnItem: 3, clickOnFirst: 0});
+  });
+
+
+  it('#undelegateEvents()', () => {
+    counters.clickOnItem = 0;
+    counters.clickOnFirst = 0;
+    expect(counters).to.be.deep.equal({clickOnItem: 0, clickOnFirst: 0});
+    widget.undelegateEvents();
+    $('ul li').trigger('click');
+    expect(counters).to.be.deep.equal({clickOnItem: 0, clickOnFirst: 0});
+  });
 
 
 });

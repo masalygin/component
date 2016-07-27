@@ -1,11 +1,11 @@
-module.exports = function(config) {
+module.exports = function (config) {
   config.set({
 
     frameworks: ['mocha'],
     files: ['test/index.js'],
 
     preprocessors: {
-      'test/index.js': ['webpack']
+      'test/index.js': ['webpack', 'coverage']
     },
 
     webpack: {
@@ -18,22 +18,28 @@ module.exports = function(config) {
       }
     },
 
-
     webpackMiddleware: {
       noInfo: true
     },
 
+    reporters: ['coverage'],
 
+    coverageReporter: {
+      type: 'lcov',
+      dir: 'coverage/',
+      subdir: '.'
+    },
 
     plugins: [
       require("karma-webpack"),
       require("karma-phantomjs-launcher"),
-      require('karma-mocha')
+      require('karma-mocha'),
+      require('karma-coverage')
     ],
 
     browsers: ['PhantomJS'],
 
-    autoWatch: true,
+    singleRun: true
 
   })
 };
